@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elena Vora | Visual Artist</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        'off-black': '#0a0a0a',
+                        'off-white': '#f2f2f2',
+                        'accent': '#ff3c3c'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #f2f2f2;
+            overflow-x: hidden;
+            cursor: default; /* Keep default but style interactive elements */
+        }
+
+        /* Noise Texture Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Image Hover Reveal */
+        .art-item-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+            color: transparent;
+            transition: all 0.5s ease;
+        }
+        .group:hover .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 1);
+            color: white;
+        }
+
+        /* Smooth reveal for elements */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Masonry Grid Hacks */
+        .masonry-grid {
+            column-count: 1;
+            column-gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .masonry-grid {
+                column-count: 2;
+            }
+        }
+        @media (min-width: 1024px) {
+            .masonry-grid {
+                column-count: 3;
+            }
+        }
+        
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 2rem;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Noise Texture -->
+    <div class="noise-overlay"></div>
+
+    <!-- Background Canvas Animation -->
+    <canvas id="bgCanvas" class="fixed top-0 left-0 w-full h-full -z-10 opacity-40"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-6 md:p-10 flex justify-between items-center z-40 mix-blend-difference">
+        <a href="#" class="font-display font-bold text-xl md:text-2xl tracking-tighter hover:opacity-70 transition-opacity">ELENA VORA</a>
+        
+        <div class="hidden md:flex gap-8 text-sm font-sans tracking-widest uppercase">
+            <a href="#gallery" class="hover:text-gray-400 transition-colors">Work</a>
+            <a href="#about" class="hover:text-gray-400 transition-colors">About</a>
+            <a href="#contact" class="hover:text-gray-400 transition-colors">Contact</a>
+        </div>
+
+        <button class="md:hidden text-white" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+            <i data-lucide="menu"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col justify-center items-center gap-8 text-2xl font-display">
+        <button class="absolute top-6 right-6" onclick="document.getElementById('mobile-menu').classList.add('hidden')">
+            <i data-lucide="x"></i>
+        </button>
+        <a href="#gallery" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Work</a>
+        <a href="#about" onclick="document.getElementById('mobile-menu').classList.add('hidden')">About</a>
+        <a href="#contact" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Contact</a>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex flex-col justify-center px-6 md:px-20 pt-20">
+        <div class="max-w-7xl mx-auto w-full z-10">
+            <p class="reveal font-sans text-sm md:text-base tracking-[0.3em] text-gray-400 uppercase mb-4">Digital & Mixed Media</p>
+            <h1 class="font-display text-6xl md:text-8xl lg:text-9xl font-bold leading-[0.9] tracking-tighter mb-8">
+                <span class="reveal block" style="transition-delay: 100ms;">CONSTRUCTING</span>
+                <span class="reveal block text-outline hover:text-white transition-colors cursor-default" style="transition-delay: 200ms;">THE UNSEEN</span>
+                <span class="reveal block text-gray-500" style="transition-delay: 300ms;">REALITY.</span>
+            </h1>
+            
+            <div class="reveal mt-12 flex items-center gap-4 group cursor-pointer w-max" style="transition-delay: 400ms;" onclick="document.getElementById('gallery').scrollIntoView({behavior: 'smooth'})">
+                <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white transition-colors">
+                    <i data-lucide="arrow-down" class="w-5 h-5 group-hover:translate-y-1 transition-transform"></i>
+                </div>
+                <span class="font-sans text-sm tracking-widest uppercase text-gray-400 group-hover:text-white transition-colors">Explore Portfolio</span>
+            </div>
+        </div>
+
+        <!-- Decorative Info -->
+        <div class="absolute bottom-10 right-6 md:right-20 text-right hidden md:block reveal" style="transition-delay: 600ms;">
+            <p class="font-sans text-xs text-gray-500 tracking-widest uppercase">Based in<br>Berlin, Germany</p>
+        </div>
+    </header>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-20 px-6 md:px-20 min-h-screen">
+        <div class="flex justify-between items-end mb-16 reveal">
+            <h2 class="font-display text-4xl md:text-5xl font-bold">Selected Works</h2>
+            <p class="hidden md:block font-sans text-sm text-gray-500">(2023 — 2025)</p>
+        </div>
+
+        <div class="masonry-grid" id="gallery-grid">
+            <!-- Gallery items will be injected by JS for neat data handling, but let's hardcode a few for structure -->
+            
+            <!-- Item 1 -->
+            <div class="masonry-item reveal group cursor-pointer" onclick="openLightbox(0)">
+                <div class="relative overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=2670&auto=format&fit=crop" alt="Abstract Oil" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 art-item-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <h3 class="font-display text-2xl font-bold">Chromatics I</h3>
+                        <p class="font-sans text-xs tracking-widest uppercase text-gray-300">Oil on Canvas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="masonry-item reveal group cursor-pointer" onclick="openLightbox(1)">
+                <div class="relative overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" alt="Digital Flow" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 art-item-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <h3 class="font-display text-2xl font-bold">Neural Net</h3>
+                        <p class="font-sans text-xs tracking-widest uppercase text-gray-300">Generative Digital</p>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Item 3 -->
+             <div class="masonry-item reveal group cursor-pointer" onclick="openLightbox(2)">
+                <div class="relative overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2670&auto=format&fit=crop" alt="Dark Texture" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 art-item-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <h3 class="font-display text-2xl font-bold">Void State</h3>
+                        <p class="font-sans text-xs tracking-widest uppercase text-gray-300">Photography</p>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Item 4 -->
+             <div class="masonry-item reveal group cursor-pointer" onclick="openLightbox(3)">
+                <div class="relative overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop" alt="Fluid" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 art-item-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <h3 class="font-display text-2xl font-bold">Liquid Dreams</h3>
+                        <p class="font-sans text-xs tracking-widest uppercase text-gray-300">3D Render</p>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Item 5 -->
+             <div class="masonry-item reveal group cursor-pointer" onclick="openLightbox(4)">
+                <div class="relative overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=2545&auto=format&fit=crop" alt="Art 5" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 art-item-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <h3 class="font-display text-2xl font-bold">Bloom</h3>
+                        <p class="font-sans text-xs tracking-widest uppercase text-gray-300">Acrylic Pour</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="masonry-item reveal group cursor-pointer" onclick="openLightbox(5)">
+                <div class="relative overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=2670&auto=format&fit=crop" alt="Neon" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 art-item-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                        <h3 class="font-display text-2xl font-bold">Neon Noir</h3>
+                        <p class="font-sans text-xs tracking-widest uppercase text-gray-300">Cyberpunk Concept</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 px-6 md:px-20 bg-[#0a0a0a] border-t border-white/5">
+        <div class="max-w-4xl">
+            <h2 class="font-display text-4xl md:text-5xl font-bold mb-10 reveal">The Artist</h2>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="reveal">
+                    <p class="font-sans text-lg md:text-xl leading-relaxed text-gray-300 mb-6">
+                        Elena Vora uses digital mediums to explore the intersection of organic chaos and structured algorithms. Her work challenges the perception of reality through texture, light, and motion.
+                    </p>
+                    <p class="font-sans text-gray-500">
+                        Featured in exhibitions across Berlin, Tokyo, and New York. Currently exploring the boundaries of generative AI and traditional oil painting.
+                    </p>
+                </div>
+                <div class="reveal space-y-4">
+                    <div class="border-b border-white/10 pb-2">
+                        <span class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Exhibitions</span>
+                        <span class="block font-display text-xl">Neon Gallery, Berlin (2024)</span>
+                    </div>
+                    <div class="border-b border-white/10 pb-2">
+                        <span class="block font-display text-xl">Future Art Fair, Tokyo (2023)</span>
+                    </div>
+                    <div class="border-b border-white/10 pb-2">
+                        <span class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Awards</span>
+                        <span class="block font-display text-xl">Digital Innovation Prize</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Contact -->
+    <footer id="contact" class="py-20 px-6 md:px-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+        <div>
+            <h2 class="font-display text-6xl md:text-8xl font-bold tracking-tighter mb-6 text-white/90">LET'S<br>CREATE.</h2>
+            <a href="mailto:hello@elenavora.art" class="inline-block text-xl border-b border-white pb-1 hover:text-gray-400 hover:border-gray-400 transition-colors">hello@elenavora.art</a>
+        </div>
+        
+        <div class="flex gap-6">
+            <a href="#" class="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all">
+                <i data-lucide="instagram" class="w-5 h-5"></i>
+            </a>
+            <a href="#" class="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all">
+                <i data-lucide="twitter" class="w-5 h-5"></i>
+            </a>
+            <a href="#" class="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all">
+                <i data-lucide="linkedin" class="w-5 h-5"></i>
+            </a>
+        </div>
+    </footer>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-[60] bg-black/95 hidden flex justify-center items-center p-4 md:p-10 opacity-0 transition-opacity duration-300">
+        <button class="absolute top-6 right-6 text-white hover:text-gray-400 transition-colors z-50" onclick="closeLightbox()">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+        
+        <div class="relative w-full max-w-6xl max-h-full flex flex-col md:flex-row items-center gap-8">
+            <div class="w-full md:w-3/4 flex items-center justify-center h-[70vh] md:h-[85vh]">
+                <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain shadow-2xl" alt="Artwork">
+            </div>
+            <div class="w-full md:w-1/4 text-white">
+                <h3 id="lightbox-title" class="font-display text-3xl md:text-4xl font-bold mb-2">Title</h3>
+                <p id="lightbox-desc" class="font-sans text-sm tracking-widest uppercase text-gray-400 mb-6">Description</p>
+                <div class="w-12 h-[1px] bg-white/20 mb-6"></div>
+                <p class="font-sans text-gray-300 text-sm leading-relaxed">
+                    A stunning piece exploring the depths of texture and form. Available for acquisition.
+                </p>
+                <button class="mt-8 px-6 py-3 border border-white/30 hover:bg-white hover:text-black transition-colors uppercase text-xs tracking-widest">
+                    Inquire
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Canvas Animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = (Math.random() - 0.5) * 0.2;
+                this.size = Math.random() * 200 + 50;
+                this.color = `rgba(${Math.random() * 50 + 50}, ${Math.random() * 50 + 50}, ${Math.random() * 100 + 150}, ${Math.random() * 0.03})`;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < -this.size) this.x = width + this.size;
+                if (this.x > width + this.size) this.x = -this.size;
+                if (this.y < -this.size) this.y = height + this.size;
+                if (this.y > height + this.size) this.y = -this.size;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Create a soft gradient for each particle
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, this.color);
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const particleCount = Math.min(window.innerWidth / 30, 20); // Responsive count
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+
+        // Intersection Observer for Reveal Animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Only animate once
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Lightbox Logic
+        const lightbox = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        const lbTitle = document.getElementById('lightbox-title');
+        const lbDesc = document.getElementById('lightbox-desc');
+        
+        // Data for images (matching HTML order)
+        const artData = [
+            { src: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=2670&auto=format&fit=crop", title: "Chromatics I", desc: "Oil on Canvas, 2024" },
+            { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop", title: "Neural Net", desc: "Generative Digital, 2023" },
+            { src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2670&auto=format&fit=crop", title: "Void State", desc: "Photography, 2023" },
+            { src: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop", title: "Liquid Dreams", desc: "3D Render, 2024" },
+            { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=2545&auto=format&fit=crop", title: "Bloom", desc: "Acrylic Pour, 2023" },
+            { src: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=2670&auto=format&fit=crop", title: "Neon Noir", desc: "Cyberpunk Concept, 2024" }
+        ];
+
+        function openLightbox(index) {
+            const data = artData[index];
+            if(!data) return;
+
+            lbImg.src = data.src;
+            lbTitle.innerText = data.title;
+            lbDesc.innerText = data.desc;
+            
+            lightbox.classList.remove('hidden');
+            // Small delay to allow display block to apply before opacity transition
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+            }, 10);
+            
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        function closeLightbox() {
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+                lbImg.src = ""; // Clear source
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        // Close lightbox on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        // Close lightbox on clicking background
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+    </script>
+</body>
+</html>
