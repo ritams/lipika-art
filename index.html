@@ -47,10 +47,15 @@
     </script>
 
     <style>
+        html {
+            overflow-x: hidden;
+        }
+
         body {
             background-color: #050505;
             color: #f2f2f2;
             overflow-x: hidden;
+            max-width: 100vw;
             cursor: default;
             /* Keep default but style interactive elements */
         }
@@ -136,6 +141,20 @@
             break-inside: avoid;
             margin-bottom: 2rem;
         }
+
+        /* Fluid hero title - calculates max font size based on viewport width */
+        /* "CONSTRUCTING" is 12 chars, accounting for tracking-tighter and padding */
+        .hero-title {
+            font-size: clamp(1.75rem, 8.5vw, 8rem);
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @media (min-width: 1024px) {
+            .hero-title {
+                font-size: clamp(6rem, 10vw, 8rem);
+            }
+        }
     </style>
 </head>
 
@@ -181,11 +200,10 @@
 
     <!-- Hero Section -->
     <header class="relative min-h-screen flex flex-col justify-center px-5 sm:px-6 md:px-20 pt-24 pb-20">
-        <div class="max-w-7xl mx-auto w-full z-10">
+        <div class="max-w-7xl mx-auto w-full z-10 overflow-hidden">
             <p class="reveal font-sans text-sm md:text-base tracking-[0.3em] text-gray-400 uppercase mb-4">Digital &
                 Mixed Media</p>
-            <h1
-                class="font-display text-[2.75rem] sm:text-6xl md:text-8xl lg:text-9xl font-bold leading-[0.9] tracking-tighter mb-8">
+            <h1 class="font-display hero-title font-bold leading-[0.9] tracking-tighter mb-8">
                 <span class="reveal block" style="transition-delay: 100ms;">CONSTRUCTING</span>
                 <span class="reveal block text-outline hover:text-white transition-colors cursor-default"
                     style="transition-delay: 200ms;">THE UNSEEN</span>
